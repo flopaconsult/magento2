@@ -1,4 +1,3 @@
-# just a comment`
 sudo: required
 dist: trusty
 addons:
@@ -10,31 +9,54 @@ addons:
     - postfix
 language: php
 php:
-  - 5.5
-  - 5.6
-  - 7.0
+- 5.5
+- 5.6
+- 7.0
 env:
   global:
-    - COMPOSER_BIN_DIR=~/bin
-    - INTEGRATION_SETS=2
+  - COMPOSER_BIN_DIR=~/bin
+  - INTEGRATION_SETS=2
   matrix:
-    - TEST_SUITE=unit
-    - TEST_SUITE=integration INTEGRATION_INDEX=1
-    - TEST_SUITE=integration INTEGRATION_INDEX=2
-    - TEST_SUITE=static
+  - TEST_SUITE=unit
+  - TEST_SUITE=integration INTEGRATION_INDEX=1
+  - TEST_SUITE=integration INTEGRATION_INDEX=2
+  - TEST_SUITE=static
 cache:
   apt: true
-  directories: $HOME/.composer/cache
+  directories: "$HOME/.composer/cache"
 matrix:
   exclude:
-    - php: 5.6
-      env: TEST_SUITE=static
-    - php: 7.0
-      env: TEST_SUITE=static
-before_install: ./dev/travis/before_install.sh
+  - php: 5.6
+    env: TEST_SUITE=static
+  - php: 7.0
+    env: TEST_SUITE=static
+before_install: "./dev/travis/before_install.sh"
 install: composer install --no-interaction --prefer-dist
-before_script: ./dev/travis/before_script.sh
-script: 
-  - cd dev/tests/$TEST_SUITE
-  - test $TEST_SUITE = "static" && TEST_FILTER='--filter "Magento\\Test\\Php\\LiveCodeTest"' || true
-  - phpunit $TEST_FILTER
+before_script: "./dev/travis/before_script.sh"
+script:
+- cd dev/tests/$TEST_SUITE
+- test $TEST_SUITE = "static" && TEST_FILTER='--filter "Magento\\Test\\Php\\LiveCodeTest"'
+  || true
+- phpunit $TEST_FILTER
+deploy:
+- provider: s3
+  access_key_id: AKIAJZHBNCSPMGIZ6OBQ
+  secret_access_key: &1
+    secure: ibIljPLdjaISRGN1LFk1jM4voNu9JpXjBQSAuBpBjUoacxZTo8spNtjCh8jV9G7ypFA9f19eGVAvYnyf23ereGYBidL37hMjVA+zOcbdOlNFNG/tzTVPtMMmKvBoozZz9E8HIrtEB/pf+FCpz8B5RfnyZrrn7nZtc9ovAgyLvwSLUJgMcDwKYLCcreGRX8/ye5OJ1+V+KLv9fgvVGhaNpN+/MfvupKuBgyZVZ2uBPWf5YmJiBEPh7FFKBhK/TdGoLIF1lHR+Sk9Xy3UB/OZKsxEtoRAg6IRtAVYLb8lxyzozygGsboDpDg2UpdMKiU1Uy58PoIgDgAEboMbNOCLeUr9JPpwn5a2nI4NvE7FMaaxh+PkNkr9yCB/2vu4dWLsP0LEZhM6FL6Ns4G92SfrBWXO4xzfC30TDdVyQL2RKlJevZDhGmq5dJ9O/rJO7HG4XNK+73NrnUGKAcutrhm8U+jC2hF0ghUyWHynAJse4IYODLv07q7e0sadqk0i6k9VtrNKZqD2ibrOTSy6IVRE/pw6m3GqiyLnVJ0830h/GhspcXQwR0r6hatd8/EEeNzeQPUz2E/DKcbMoTY74qmQ8bmDW9rkPrSkmQBHIilaQSTO52uDV256uS9WR9TiIKbSRYrslt3a2cwrRSvv+Zsndfrt82pPiy2J2oXfPJcdUuwY=
+  local_dir: dpl_cd_upload
+  skip_cleanup: true
+  on: &2
+    repo: flopaconsult/magento2
+  bucket: "/florin"
+- provider: codedeploy
+  access_key_id: AKIAJZHBNCSPMGIZ6OBQ
+  secret_access_key: *1
+  bucket: "/florin"
+  key: AKIAJZHBNCSPMGIZ6OBQ
+  bundle_type: zip
+  application: magento2
+  deployment_group: magento2
+  on: *2
+before_deploy:
+- mkdir -p dpl_cd_upload
+- mv AKIAJZHBNCSPMGIZ6OBQ dpl_cd_upload/AKIAJZHBNCSPMGIZ6OBQ
