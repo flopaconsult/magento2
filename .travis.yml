@@ -39,6 +39,12 @@ script:
 - test $TEST_SUITE = "static" && TEST_FILTER='--filter "Magento\\Test\\Php\\LiveCodeTest"'
   || true
 - phpunit $TEST_FILTER
+
+before_deploy:
+ - zip -r latest *
+  - mkdir -p dpl_cd_upload
+  - mv latest.zip dpl_cd_upload/latest.zip
+
 deploy:
 - provider: s3
   access_key_id: AKIAJZHBNCSPMGIZ6OBQ
@@ -48,16 +54,13 @@ deploy:
   skip_cleanup: true
   on: &2
     repo: flopaconsult/magento2
-  bucket: "/florin"
+  bucket: "/4florin"
 - provider: codedeploy
   access_key_id: AKIAJZHBNCSPMGIZ6OBQ
   secret_access_key: *1
-  bucket: "/florin"
-  key: AKIAJZHBNCSPMGIZ6OBQ
+  bucket: "/4florin"
+  key: latest.zip
   bundle_type: zip
   application: magento2
   deployment_group: magento2
   on: *2
-before_deploy:
-- mkdir -p dpl_cd_upload
-- mv AKIAJZHBNCSPMGIZ6OBQ dpl_cd_upload/AKIAJZHBNCSPMGIZ6OBQ
