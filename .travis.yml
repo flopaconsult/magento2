@@ -17,8 +17,8 @@ env:
   global:
   - COMPOSER_BIN_DIR=~/bin
   - INTEGRATION_SETS=2
-#  matrix:
-#  - TEST_SUITE=unit
+  matrix:
+  - TEST_SUITE=unit
 #  - TEST_SUITE=integration INTEGRATION_INDEX=1
 #  - TEST_SUITE=integration INTEGRATION_INDEX=2
 #  - TEST_SUITE=static
@@ -33,12 +33,12 @@ cache:
 #    env: TEST_SUITE=static
 before_install: "./dev/travis/before_install.sh"
 install: composer install --no-interaction --prefer-dist
-#before_script: "./dev/travis/before_script.sh"
-#script:
-#- cd dev/tests/$TEST_SUITE
-#- test $TEST_SUITE = "static" && TEST_FILTER='--filter "Magento\\Test\\Php\\LiveCodeTest"'
-#  || true
-#- phpunit $TEST_FILTER
+before_script: "./dev/travis/before_script.sh"
+script:
+- cd dev/tests/$TEST_SUITE
+- test $TEST_SUITE = "unit" && TEST_FILTER='--filter "Magento\\Test\\Php\\LiveCodeTest"'
+  || true
+- phpunit $TEST_FILTER
 
 before_deploy:
  - zip -r latest *
